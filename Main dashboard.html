@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Report: Credit Card Fraud Detection</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8f7f4; 
+        }
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 700px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 40vh; 
+            max-height: 450px; 
+        }
+        .nav-link { 
+            transition: color 0.3s, border-color 0.3s; 
+        }
+        .nav-link.active { 
+            color: #c7a17a; 
+            border-bottom-color: #c7a17a; 
+        }
+        .nav-link:hover {
+            color: #c7a17a;
+        }
+        .method-step { 
+            transition: all 0.3s; 
+            cursor: pointer;
+        }
+        .method-step.active { 
+            border-color: #c7a17a; 
+            background-color: #fff; 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
+        }
+        .method-step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px -2px rgba(0,0,0,0.1);
+        }
+        .accordion-content { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.5s ease-in-out; 
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        }
+        .stat-link {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .stat-link:hover {
+            transform: scale(1.05);
+            text-decoration: underline;
+        }
+        .dashboard-link {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+        .dashboard-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-800">ML-Powered Fraud Detection</h1>
+                <a href="Index.html" class="dashboard-link">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Go to Dashboard</span>
+                </a>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#problem" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">The Problem</a>
+                <a href="#approach" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">The Approach</a>
+                <a href="#showdown" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Model Showdown</a>
+                <a href="#insights" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">Project Insights</a>
+                <a href="/cfd/templates/Index.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">Upload to Dashboard</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-white border border-gray-300 rounded-md p-2">
+                    <option value="#problem">The Problem</option>
+                    <option value="#approach">The Approach</option>
+                    <option value="#showdown">Model Showdown</option>
+                    <option value="#insights">Project Insights</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section id="problem" class="my-16 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    The Challenge of Modern Financial Fraud
+                </h2>
+                <p class="max-w-3xl mx-auto text-gray-600 text-lg leading-relaxed">
+                    This project addresses the critical need for a high-precision, adaptive system to combat credit card fraud. Traditional rule-based methods are no longer sufficient against the dynamic and sophisticated tactics used by fraudsters today. We leverage machine learning to create a more effective and intelligent solution.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover text-center">
+                    <div class="text-5xl font-bold text-red-500 mb-4 stat-link" onclick="window.open('https://araconomy.com/finance/credit-card-losses-reach-highest-levels-since-financial-crisis-implications-for-financial-institutions-and-consumers/', '_blank')">$32B</div>
+                    <h3 class="text-xl font-semibold mb-2">Annual Losses</h3>
+                    <p class="text-gray-600">Lost annually to credit card fraud, impacting consumers, merchants, and financial institutions globally.</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover text-center">
+                    <div class="text-5xl font-bold text-blue-500 mb-4 stat-link" onclick="window.open('https://www.cardrates.com/advice/credit-card-fraud-statistics/', '_blank')">0.172%</div>
+                    <h3 class="text-xl font-semibold mb-2">Fraud Rate</h3>
+                    <p class="text-gray-600">Of transactions in our dataset are fraudulent, highlighting the severe class imbalance that makes detection difficult.</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover text-center">
+                    <div class="text-5xl font-bold text-yellow-500 mb-4 stat-link" onclick="window.open('https://cybercrime.gov.in/', '_blank')">&lt;100ms</div>
+                    <h3 class="text-xl font-semibold mb-2">Detection Time</h3>
+                    <p class="text-gray-600">Real-time detection is essential. Models must analyze and flag suspicious transactions in milliseconds to prevent loss.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="approach" class="my-16 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                    Our Machine Learning Workflow
+                </h2>
+                <p class="max-w-3xl mx-auto text-gray-600 text-lg leading-relaxed">
+                    We follow a structured methodology to build our fraud detection engine. Each step is crucial for developing a robust and accurate model. Click on any step below to explore the details and see relevant visualizations.
+                </p>
+            </div>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0 mb-8">
+                <div id="step-1" class="method-step active p-6 border-2 border-gray-300 rounded-lg bg-gray-50 w-full md:w-auto text-center font-semibold">
+                    📊 Data Collection
+                </div>
+                <div class="text-gray-400 mx-4 hidden md:block text-2xl">→</div>
+                <div id="step-2" class="method-step p-6 border-2 border-gray-300 rounded-lg bg-gray-50 w-full md:w-auto text-center font-semibold">
+                    🔍 Preprocessing & EDA
+                </div>
+                <div class="text-gray-400 mx-4 hidden md:block text-2xl">→</div>
+                <div id="step-3" class="method-step p-6 border-2 border-gray-300 rounded-lg bg-gray-50 w-full md:w-auto text-center font-semibold">
+                    🤖 Model Building
+                </div>
+                <div class="text-gray-400 mx-4 hidden md:block text-2xl">→</div>
+                <div id="step-4" class="method-step p-6 border-2 border-gray-300 rounded-lg bg-gray-50 w-full md:w-auto text-center font-semibold">
+                    📈 Evaluation
+                </div>
+            </div>
+            <div id="method-content" class="bg-white p-8 rounded-xl shadow-lg min-h-[500px] flex flex-col md:flex-row items-center gap-8">
+            </div>
+        </section>
+
+        <section id="showdown" class="my-16 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-red-600 bg-clip-text text-transparent">
+                    Model Performance Showdown
+                </h2>
+                <p class="max-w-3xl mx-auto text-gray-600 text-lg leading-relaxed">
+                    We trained and evaluated three different machine learning models. The chart below compares their performance on key metrics for fraud detection. A good model needs high <strong>Precision</strong> (to avoid false alarms) and high <strong>Recall</strong> (to catch most fraud). The <strong>F1-Score</strong> provides a balanced measure of both.
+                </p>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <div class="chart-container">
+                    <canvas id="modelComparisonChart"></canvas>
+                </div>
+                <div class="mt-6 grid md:grid-cols-3 gap-4 text-center">
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <h4 class="font-semibold text-blue-700">Precision</h4>
+                        <p class="text-sm text-gray-600 mt-1">Of flagged transactions, how many were actually fraud?</p>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <h4 class="font-semibold text-green-700">Recall</h4>
+                        <p class="text-sm text-gray-600 mt-1">Of actual fraud, how much did we catch?</p>
+                    </div>
+                    <div class="p-4 bg-red-50 rounded-lg">
+                        <h4 class="font-semibold text-red-700">F1-Score</h4>
+                        <p class="text-sm text-gray-600 mt-1">Balanced measure of precision and recall</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="insights" class="my-16 scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
+                    Project Insights & Future Work
+                </h2>
+                <p class="max-w-3xl mx-auto text-gray-600 text-lg leading-relaxed">
+                    This section provides additional context on the project, including our review of existing work, future plans for deployment, and our final conclusions.
+                </p>
+            </div>
+            <div class="space-y-4 max-w-4xl mx-auto">
+                <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden">
+                    <button class="accordion-header w-full text-left p-6 font-semibold text-lg flex justify-between items-center hover:bg-gray-50 transition-colors">
+                        <span>📚 Literature Review</span>
+                        <span class="transform transition-transform duration-300 text-2xl">↓</span>
+                    </button>
+                    <div class="accordion-content px-6 pb-6 text-gray-600">
+                        <p class="leading-relaxed">Existing literature shows a clear trend from simple statistical models to more complex ensemble and neural network approaches for fraud detection. Key research highlights the importance of handling class imbalance, with techniques like SMOTE being crucial for model performance. Our work builds upon these findings by comparing traditional models like Logistic Regression against more advanced methods like Random Forests and Neural Networks on a standard, real-world dataset.</p>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden">
+                    <button class="accordion-header w-full text-left p-6 font-semibold text-lg flex justify-between items-center hover:bg-gray-50 transition-colors">
+                        <span>🚀 Future Work</span>
+                        <span class="transform transition-transform duration-300 text-2xl">↓</span>
+                    </button>
+                    <div class="accordion-content px-6 pb-6 text-gray-600">
+                        <div class="space-y-4">
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <h4 class="font-semibold text-blue-700 mb-2">🔧 Deployment</h4>
+                                <p>Package the best-performing model into a REST API using Flask or FastAPI for real-time prediction capabilities in a production environment.</p>
+                            </div>
+                            <div class="p-4 bg-green-50 rounded-lg">
+                                <h4 class="font-semibold text-green-700 mb-2">🧠 Advanced Models</h4>
+                                <p>Explore deep learning architectures like LSTMs to capture sequential patterns in a user's transaction history, potentially identifying more sophisticated fraud.</p>
+                            </div>
+                            <div class="p-4 bg-purple-50 rounded-lg">
+                                <h4 class="font-semibold text-purple-700 mb-2">🔍 Explainable AI (XAI)</h4>
+                                <p>Integrate XAI tools like SHAP or LIME to make the model's decisions transparent, which is crucial for regulatory compliance and building trust with stakeholders.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden">
+                    <button class="accordion-header w-full text-left p-6 font-semibold text-lg flex justify-between items-center hover:bg-gray-50 transition-colors">
+                        <span>🎯 Conclusion</span>
+                        <span class="transform transition-transform duration-300 text-2xl">↓</span>
+                    </button>
+                    <div class="accordion-content px-6 pb-6 text-gray-600">
+                        <p class="leading-relaxed">This project successfully demonstrates the efficacy of machine learning in developing a robust system for credit card fraud detection. By leveraging advanced algorithms and addressing the challenge of imbalanced data, our models significantly outperform traditional systems. The proposed solution offers higher accuracy, adaptability, and scalability, promising a more secure financial ecosystem.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="gradient-bg text-white py-12">
+        <div class="container mx-auto px-6 text-center">
+            <h3 class="text-2xl font-bold mb-4">Project Team</h3>
+            <p class="text-lg mb-2">Deepanshu Saini • Devansh farebi • Rishabh Tiwari • Harsh Sinha</p>
+            <p class="text-sm opacity-80">Under the supervision of Mr. Manoj Mishra</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const methodSteps = document.querySelectorAll('.method-step');
+            const methodContent = document.getElementById('method-content');
+            let imbalanceChart = null;
+
+            const contentData = {
+                'step-1': {
+                    title: 'Data Collection',
+                    description: 'The foundation of our project is a high-quality dataset. We use the "Credit Card Fraud Detection" dataset from Kaggle, a standard benchmark for this task. It contains anonymized transactions made by European cardholders over two days.',
+                    viz: 'none',
+                    icon: '📊'
+                },
+                'step-2': {
+                    title: 'Preprocessing & Exploratory Data Analysis (EDA)',
+                    description: 'Raw data is rarely ready for modeling. We perform crucial preprocessing steps like scaling numerical features to normalize the data. Our EDA revealed a severe class imbalance: only 0.172% of transactions are fraudulent. This is the primary challenge we must address, as a naive model would simply predict "not fraud" every time and be 99.8% accurate but useless. We use the SMOTE technique to synthetically create new fraud examples in our training data to balance the classes.',
+                    viz: 'chart',
+                    icon: '🔍'
+                },
+                'step-3': {
+                    title: 'Model Building',
+                    description: 'We build three distinct models to compare different approaches:<br><br><strong>• Logistic Regression:</strong> A simple, interpretable baseline model.<br><br><strong>• Random Forest:</strong> An ensemble method that combines many decision trees for higher accuracy and robustness.<br><br><strong>• Neural Network:</strong> A deep learning model built with TensorFlow/Keras, capable of learning complex, non-linear patterns in the data.<br><br>The data is split into 70% for training and 30% for testing.',
+                    viz: 'none',
+                    icon: '🤖'
+                },
+                'step-4': {
+                    title: 'Model Evaluation',
+                    description: 'After training, we evaluate our models on unseen test data. We use metrics that are sensitive to the class imbalance problem:<br><br><strong>• Precision:</strong> Of all transactions we flagged as fraud, how many were actually fraud? (Measures false positives)<br><br><strong>• Recall:</strong> Of all the actual fraud transactions, how many did we catch? (Measures false negatives)<br><br><strong>• F1-Score:</strong> A weighted average of Precision and Recall.<br><br><strong>• AUC-ROC:</strong> Measures the model\'s ability to distinguish between classes.',
+                    viz: 'none',
+                    icon: '📈'
+                }
+            };
+
+            function updateMethodContent(stepId) {
+                const data = contentData[stepId];
+                let vizHtml = '';
+                if (data.viz === 'chart') {
+                    vizHtml = `
+                        <div class="w-full md:w-1/2 flex justify-center items-center">
+                            <div style="position: relative; width: 100%; max-width: 400px; height: 400px;">
+                                <canvas id="imbalanceChart"></canvas>
+                            </div>
+                        </div>`;
+                } else {
+                    vizHtml = `
+                        <div class="w-full md:w-1/2 flex justify-center items-center">
+                            <div class="text-center">
+                                <div class="text-8xl mb-4">${data.icon}</div>
+                                <div class="text-2xl font-semibold text-gray-400">Interactive Content</div>
+                            </div>
+                        </div>`;
+                }
+
+                const textHtml = `
+                    <div class="w-full md:w-1/2">
+                        <h3 class="text-3xl font-bold mb-6 text-gray-800">${data.title}</h3>
+                        <div class="text-gray-600 leading-relaxed text-lg">${data.description}</div>
+                    </div>
+                `;
+                
+                methodContent.innerHTML = stepId === 'step-2' ? vizHtml + textHtml : textHtml + vizHtml;
+
+                if (data.viz === 'chart') {
+                    if(imbalanceChart) imbalanceChart.destroy();
+                    const ctx = document.getElementById('imbalanceChart').getContext('2d');
+                    imbalanceChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Legitimate Transactions', 'Fraudulent Transactions'],
+                            datasets: [{
+                                data: [99.828, 0.172],
+                                backgroundColor: ['#10b981', '#ef4444'],
+                                borderColor: ['#ffffff'],
+                                borderWidth: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { 
+                                    position: 'bottom',
+                                    labels: {
+                                        font: { size: 14 },
+                                        padding: 20
+                                    }
+                                },
+                                title: { 
+                                    display: true, 
+                                    text: 'Class Distribution in Dataset',
+                                    font: { size: 18, weight: 'bold' },
+                                    padding: 20
+                                }
+                            },
+                            cutout: '60%'
+                        }
+                    });
+                }
+            }
+
+            methodSteps.forEach(step => {
+                step.addEventListener('click', () => {
+                    methodSteps.forEach(s => s.classList.remove('active'));
+                    step.classList.add('active');
+                    updateMethodContent(step.id);
+                });
+            });
+
+            updateMethodContent('step-1');
+
+            // Model Comparison Chart
+            const modelCtx = document.getElementById('modelComparisonChart').getContext('2d');
+            new Chart(modelCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Logistic Regression', 'Random Forest', 'Neural Network'],
+                    datasets: [
+                        {
+                            label: 'Precision',
+                            data: [0.86, 0.92, 0.94],
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        },
+                        {
+                            label: 'Recall',
+                            data: [0.58, 0.79, 0.82],
+                            backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        },
+                        {
+                            label: 'F1-Score',
+                            data: [0.69, 0.85, 0.87],
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            max: 1, 
+                            title: { 
+                                display: true, 
+                                text: 'Score',
+                                font: { size: 16, weight: 'bold' }
+                            },
+                            ticks: {
+                                font: { size: 14 }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: { size: 14 }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { 
+                            position: 'top',
+                            labels: {
+                                font: { size: 16 },
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'rect'
+                            }
+                        },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleFont: { size: 16 },
+                            bodyFont: { size: 14 }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                }
+            });
+            
+            // Accordion functionality
+            const accordions = document.querySelectorAll('.accordion-item');
+            accordions.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const arrow = header.querySelector('span:last-child');
+                header.addEventListener('click', () => {
+                    const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+                    accordions.forEach(i => {
+                        i.querySelector('.accordion-content').style.maxHeight = '0px';
+                        i.querySelector('.accordion-header span:last-child').style.transform = 'rotate(0deg)';
+                    });
+                    if (!isOpen) {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        arrow.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            // Navigation highlighting
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            
+            function updateActiveNav() {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 150) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', updateActiveNav);
+            updateActiveNav();
+            
+            // Mobile navigation
+            document.getElementById('mobile-nav').addEventListener('change', function() {
+                document.querySelector(this.value).scrollIntoView({ behavior: 'smooth' });
+            });
+
+            // Smooth scrolling for navigation links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    document.querySelector(targetId).scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
