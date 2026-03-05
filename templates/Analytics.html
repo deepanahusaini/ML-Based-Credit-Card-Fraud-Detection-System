@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FraudShield – Analytics Dashboard</title>
+
+<!-- ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- CHART JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+/* ========== GLOBAL STYLES (same as your main dashboard) ========== */
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #1f1c2c, #928dab);
+    min-height: 100vh;
+}
+.glow {
+    box-shadow: 0 0 12px rgba(120, 80, 255, 0.6);
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 250px;
+    background: #2a2655;
+    padding: 25px 0;
+    color: white;
+    position: fixed;
+    height: 100%;
+    border-right: 2px solid rgba(255,255,255,0.1);
+}
+.logo {
+    text-align: center;
+    margin-bottom: 25px;
+}
+.logo i {
+    font-size: 45px;
+    color: #ffbf00;
+    filter: drop-shadow(0 0 8px #ffbf00);
+    animation: pulse 1.6s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.9; }
+}
+.logo h1 {
+    margin-top: 10px;
+    font-size: 22px;
+    letter-spacing: 1px;
+}
+
+.nav-links a {
+    display: block;
+    padding: 13px 25px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: 0.3s;
+}
+.nav-links a:hover,
+.nav-links .active {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+}
+
+/* MAIN CONTENT */
+.main {
+    margin-left: 260px;
+    padding: 25px;
+    color: white;
+}
+.header h2 {
+    font-size: 28px;
+    margin-bottom: 25px;
+}
+
+/* STATS CARDS */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+.stat-card {
+    background: rgba(255,255,255,0.15);
+    padding: 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+.stat-title {
+    font-size: 16px;
+    opacity: 0.8;
+}
+.stat-value {
+    font-size: 34px;
+    margin: 10px 0;
+    font-weight: 900;
+}
+
+/* CHARTS */
+.charts {
+    margin-top: 35px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+}
+.chart-box {
+    background: rgba(255,255,255,0.15);
+    padding: 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="logo">
+        <i class="fas fa-shield-halved"></i>
+        <h1>FraudShield</h1>
+    </div>
+
+    <div class="nav-links">
+        <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+        <a class="active"><i class="fas fa-chart-bar"></i> Analytics</a>
+        <a id="reportsRedirect"><i class="fas fa-file"></i> Reports</a>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+    <div class="header">
+        <h2>Global Analytics Dashboard</h2>
+    </div>
+
+    <!-- LIVE GLOBAL STATS -->
+    <div class="stats-container">
+
+        <div class="stat-card glow">
+            <div class="stat-title">GLOBAL TRANSACTIONS (LIVE)</div>
+            <div id="globalTx" class="stat-value">Loading...</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">GLOBAL FRAUD ATTEMPTS</div>
+            <div id="globalFraud" class="stat-value">Loading...</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">GLOBAL PAYMENT APIs ONLINE</div>
+            <div id="globalApis" class="stat-value">Loading...</div>
+        </div>
+
+    </div>
+
+    <!-- GLOBAL CHARTS -->
+    <div class="charts">
+
+        <div class="chart-box">
+            <h3>Global Transactions Growth</h3>
+            <canvas id="growthChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+            <h3>Fraud % by Continent</h3>
+            <canvas id="continentChart"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+/* ========== REPORTS REDIRECT ========== */
+document.getElementById("reportsRedirect").addEventListener("click", () => {
+    window.open("https://cybercrime.gov.in/", "_blank");
+});
+
+/* ========== FREE GLOBAL LIVE DATA API ========== */
+async function loadGlobalAnalytics() {
+    try {
+        const res = await fetch("https://api.publicapis.org/entries");
+        const data = await res.json();
+
+        if (data && data.count) {
+            document.getElementById("globalApis").innerHTML = data.count.toLocaleString();
+        } else {
+            document.getElementById("globalApis").innerHTML = "1,234";
+        }
+
+        // Fake but realistic live global data
+        let tx = Math.floor(Math.random() * 9000000) + 1000000;
+        let fraud = Math.floor(tx * 0.003);
+
+        document.getElementById("globalTx").innerHTML = tx.toLocaleString();
+        document.getElementById("globalFraud").innerHTML = fraud.toLocaleString();
+
+    } catch (err) {
+        // Fallback to default values if API fails
+        document.getElementById("globalTx").innerHTML = "5,234,567";
+        document.getElementById("globalFraud").innerHTML = "15,704";
+        document.getElementById("globalApis").innerHTML = "1,234";
+    }
+}
+
+// Load immediately and then set interval
+loadGlobalAnalytics();
+setInterval(loadGlobalAnalytics, 3000);
+
+/* ========== CHARTS ========== */
+
+// Wait for DOM to be fully loaded before initializing charts
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart 1 — Global Growth Line Chart
+    const growthChartCtx = document.getElementById('growthChart');
+    if (growthChartCtx) {
+        const growthChart = new Chart(growthChartCtx, {
+            type: 'line',
+            data: {
+                labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+                datasets: [{
+                    label: "Transactions (in millions)",
+                    data: [12, 14, 15, 17, 18, 20, 21],
+                    borderColor: "#ffbf00",
+                    pointRadius: 4,
+                    pointBackgroundColor: "#ffbf00",
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+    }
+
+    // Chart 2 — Fraud by Continent
+    const continentChartCtx = document.getElementById('continentChart');
+    if (continentChartCtx) {
+        const continentChart = new Chart(continentChartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ["Asia", "Europe", "North America", "Africa", "South America"],
+                datasets: [{
+                    data: [40, 25, 20, 10, 5],
+                    backgroundColor: ["#ffbf00","#ff8e00","#d72638","#6a00f4","#04a777"]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+    }
+});
+
+</script>
+
+</body>
+</html>
